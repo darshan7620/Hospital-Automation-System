@@ -1,0 +1,44 @@
+.placeholder-page {
+  display: flex;
+  justify-content: center;
+  padding-top: var(--space-5);
+}
+
+.placeholder-page__card {
+  max-width: 560px;
+  width: 100%;
+  padding: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+
+.placeholder-page__tag {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-primary);
+  background: var(--color-primary-soft);
+  border-radius: 999px;
+  padding: 3px 10px;
+}
+
+.placeholder-page__description {
+  color: var(--color-text-muted);
+}
+
+.placeholder-page__list {
+  margin: 0;
+  padding-left: 20px;
+  color: var(--color-text-muted);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.placeholder-page__note {
+  font-size: 0.82rem;
+  color: var(--color-text-muted);
+}

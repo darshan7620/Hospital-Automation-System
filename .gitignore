@@ -1,0 +1,29 @@
+# Java / Maven
+backend-spring/target/
+*.class
+*.jar
+*.war
+
+# Local secrets
+.env
+**/application-local.yml
+**/application-local.properties
+!**/application-local.example.yml
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+npm-debug.log*
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.settings/
+.classpath
+.project
+
+# OS
+Thumbs.db
+.DS_Store

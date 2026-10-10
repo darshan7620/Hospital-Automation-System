@@ -1,0 +1,4 @@
+spring:
+  datasource:
+    username: medicore
+    password: change-me
