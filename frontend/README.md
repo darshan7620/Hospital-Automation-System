@@ -56,5 +56,5 @@ src/
 | `/departments`  | Departments (search/filter/paginate, create, edit, deactivate, view details) |
 | `/doctors`      | Doctors (search/filter/sort/paginate, create, edit, deactivate, view details) |
 | `/patients`     | Patients (search by name/phone, filter/sort/paginate, register, edit, deactivate, view details) |
-| `/appointments` | Placeholder — built in a later phase                                 |
+| `/appointments` | Appointments (filter by status/doctor/patient/date, sort/paginate, book, reschedule, confirm, complete, cancel, detail modal) |
 | `*`             | 404 page                                                    |

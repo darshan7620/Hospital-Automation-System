@@ -79,10 +79,10 @@ Status legend: `[x]` done & verified, `[ ]` not started, `[~]` in progress / par
 - [x] Department list, create, edit, and deactivate screens.
 - [x] Doctor list, create, edit, and deactivate screens.
 - [x] Patient list, registration, editing, and search screens.
-- [ ] Appointment booking form with doctor and patient selection.
-- [ ] Appointment schedule/list with filters and status actions.
-- [~] Form validation and user-friendly API error messages. _(Departments, Doctors, and Patients adopt the shared Modal/Alert/fieldErrors/409 pattern; Appointments still pending.)_
-- [~] Consistent design system, accessible forms, and responsive layout. _(Three modules done; Appointments screen still pending.)_
+- [x] Appointment booking form with doctor and patient selection.
+- [x] Appointment schedule/list with filters and status actions.
+- [x] Form validation and user-friendly API error messages. _(All four modules — Departments, Doctors, Patients, and Appointments — use the shared Modal/Alert/fieldErrors/409 pattern.)_
+- [x] Consistent design system, accessible forms, and responsive layout. _(All four modules adopt the tokens/accessibility/responsive pattern.)_
 
 ## 10. Database and Quality
 - [x] Create versioned Flyway migrations with primary keys, foreign keys, unique constraints, and indexes.
@@ -560,3 +560,38 @@ All Phase 8 checklist items and the Dashboard item of Phase 9 are done and verif
 - No browser automation used; verification = oxlint + production build + live API smoke tests against the real backend (as in Phases 6-8).
 - Dev database now contains two pre-existing demo rows left by a reviewer (`Dentist` department id=11, `Dr. Smith` doctor id=7); `patients=0`, `appointments=0`. Sample-data item (TODO §10) still open.
 - `PlaceholderPage.jsx` still contains a leftover `Coming in Phase 7` tag (used only by the pending `/appointments` page); it can be updated when the Appointments screen ships in Phase 10.
+
+### Phase 10 Progress Log — Appointment Management UI (COMPLETE, 2026-10-10)
+Built on top of the Phase 9 tree (Commit 8c6629c); no new commit made.
+
+**New files** (frontend only, no new backend changes):
+- `frontend/src/api/appointmentApi.js` — `/api/v1/appointments` Fetch layer + `ApiError` (matches the existing api.js pattern).
+- `frontend/src/pages/AppointmentsPage.jsx` — schedule page: status/doctor/patient/date filters, sort + pagination, actions (book, reschedule, confirm, complete, cancel).
+- `frontend/src/pages/AppointmentFormModal.jsx` — booking/reschedule form with doctor + patient selection, client validation, and 409-conflict handling.
+- `frontend/src/pages/AppointmentDetailModal.jsx` — detail view with audit + status history.
+- `frontend/src/pages/appointments.css` — styles following the existing design tokens.
+
+**Modified files:**
+- `frontend/src/App.jsx` — `/appointments` now routes to `AppointmentsPage` (placeholder import removed).
+- `frontend/src/lib/format.js` — added `formatDateTime`, status helpers (`allowedNextStatuses`, `isTerminalStatus`).
+
+**Behavior:** book a validated appointment, reschedule it, confirm it, complete it, and cancel one (cancelled appointments cannot be rescheduled). Filter, sort, paginate, open detail modals, and jump to doctor/patient detail views. No new libraries added.
+
+**Verification (evidence in this session):**
+- `npm run lint` → oxlint clean (0 errors / 0 warnings).
+- `npm run build` → vite v8.3.4, 64 modules transformed; `dist/index.html` 0.54 kB, `dist/assets/index-CW-mGKur.css` 19.12 kB (gzip 3.95 kB), `dist/assets/index-Cyh3vgCf.js` 346.71 kB.
+- Vite preview on :4173 served built `/appointments` and `/patients` → **200** (SPA fallback).
+- Live API smoke (`phase10_smoke.ps1`, 42 `Check` invocations) against the real backend on :8080 → **PASSED=42 FAILED=0**; created test rows `patientA=6 patientB=7 patientC=8 appointmentA=9 appointmentB=10`.
+
+**Cleanup:**
+- Deleted by exact primary key: patients `6, 7, 8` and appointments `9, 10`. Verified `appointments=0 patients=0 departments=1 doctors=1` afterwards (the pre-existing `Dentist`/`Dr. Smith` rows untouched).
+- Stopped backend JVM (PID 12868 on :8080) + javapath launcher (PID 3680), and the preview server (PID 15248 wrapper / 11204 child); ports 8080/4173 verified free.
+
+**Java process identification:** the last remaining `java.exe` (PID 12256) was an **Eclipse IDE bundled JRE** under `C:\Users\Asus\.p2\pool\plugins\org.eclipse.justj.openjdk.hotspot.jre.full.win32...` — unrelated to MediCore, correctly **left running** (it has since exited on its own; no `java.exe` remains).
+
+**Phase 10 status: all §9 Appointments items checked.** `/appointments` documented as implemented in both READMEs.
+
+**Open items:**
+- `PlaceholderPage.jsx` is now dead code (its component/`Coming in Phase 7` tag is no longer imported by `App.jsx`). Left untouched per "no app-code changes"; safe to remove later.
+- No browser automation; verification = oxlint + production build + preview route 200s + 42/42 live API smoke.
+- Sample-data item (TODO §10) still open.

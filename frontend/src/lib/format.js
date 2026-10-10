@@ -26,6 +26,22 @@ export function statusLabel(status) {
   return STATUS_LABELS[status] || status || 'Unknown'
 }
 
+const ALLOWED_TRANSITIONS = {
+  SCHEDULED: ['CONFIRMED', 'COMPLETED', 'CANCELLED', 'NO_SHOW'],
+  CONFIRMED: ['COMPLETED', 'CANCELLED', 'NO_SHOW'],
+  COMPLETED: [],
+  CANCELLED: [],
+  NO_SHOW: [],
+}
+
+export function allowedNextStatuses(status) {
+  return ALLOWED_TRANSITIONS[status] || []
+}
+
+export function isTerminalStatus(status) {
+  return allowedNextStatuses(status).length === 0
+}
+
 export function statusClass(status) {
   return STATUS_CLASS_NAMES[status] || 'badge--default'
 }

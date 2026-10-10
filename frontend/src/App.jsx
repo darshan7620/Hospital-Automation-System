@@ -4,7 +4,8 @@ import { DashboardPage } from './pages/DashboardPage'
 import { DepartmentsPage } from './pages/DepartmentsPage'
 import { DoctorsPage } from './pages/DoctorsPage'
 import { PatientsPage } from './pages/PatientsPage'
-import { NotFoundPage, PlaceholderPage } from './pages/PlaceholderPage'
+import { AppointmentsPage } from './pages/AppointmentsPage'
+import { NotFoundPage } from './pages/PlaceholderPage'
 
 export default function App() {
   return (
@@ -15,20 +16,7 @@ export default function App() {
         <Route path="/departments" element={<DepartmentsPage />} />
         <Route path="/doctors" element={<DoctorsPage />} />
         <Route path="/patients" element={<PatientsPage />} />
-        <Route
-          path="/appointments"
-          element={
-            <PlaceholderPage
-              title="Appointments"
-              description="Book appointments and manage the daily schedule."
-              capabilities={[
-                'Booking form with doctor and patient selection',
-                'Schedule list with date, doctor, patient, and status filters',
-                'Reschedule and status actions with conflict feedback',
-              ]}
-            />
-          }
-        />
+        <Route path="/appointments" element={<AppointmentsPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Route>
     </Routes>
