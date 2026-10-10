@@ -1,0 +1,97 @@
+.patients {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  max-width: 1100px;
+}
+
+.patients__intro {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.patients__subtitle {
+  font-size: 0.88rem;
+  color: var(--color-text-muted);
+}
+
+.patients__toolbar {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.patients__search {
+  flex: 1 1 220px;
+  min-width: 190px;
+}
+
+.patients__toolbar .form-field:not(.patients__search) {
+  flex: 0 0 auto;
+  min-width: 140px;
+}
+
+.patients__clear {
+  margin-bottom: 1px;
+}
+
+.patients__panel {
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.patients-table__number {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.patients-table__actions {
+  display: flex;
+  gap: 6px;
+}
+
+.detail-list__number {
+  font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace);
+  font-variant-numeric: tabular-nums;
+}
+
+.data-table__sort {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  font-size: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+.data-table__sort:hover {
+  color: var(--color-text);
+}
+
+@media (max-width: 560px) {
+  .patients__intro {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .patients__toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .patients__clear {
+    margin-bottom: 0;
+  }
+}

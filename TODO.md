@@ -78,11 +78,11 @@ Status legend: `[x]` done & verified, `[ ]` not started, `[~]` in progress / par
 - [x] Dashboard with summary cards and appointment overview.
 - [x] Department list, create, edit, and deactivate screens.
 - [x] Doctor list, create, edit, and deactivate screens.
-- [ ] Patient list, registration, editing, and search screens.
+- [x] Patient list, registration, editing, and search screens.
 - [ ] Appointment booking form with doctor and patient selection.
 - [ ] Appointment schedule/list with filters and status actions.
-- [ ] Form validation and user-friendly API error messages.
-- [ ] Consistent design system, accessible forms, and responsive layout.
+- [~] Form validation and user-friendly API error messages. _(Departments, Doctors, and Patients adopt the shared Modal/Alert/fieldErrors/409 pattern; Appointments still pending.)_
+- [~] Consistent design system, accessible forms, and responsive layout. _(Three modules done; Appointments screen still pending.)_
 
 ## 10. Database and Quality
 - [x] Create versioned Flyway migrations with primary keys, foreign keys, unique constraints, and indexes.
@@ -489,3 +489,74 @@ All Phase 8 checklist items and the Dashboard item of Phase 9 are done and verif
 - No browser automation used; verification = oxlint + production build + live API smoke tests against the real backend (as in Phases 6/7).
 - Dev database left empty (as before this phase); sample-data item (TODO §10) still open.
 - Optional checklist item "Form validation and user-friendly API error messages" is now satisfied for Departments and Doctors but remains open until Patients/Appointments adopt the same patterns.
+
+---
+
+## Phase 9 Progress Log — Patient Management UI
+
+### Files created (frontend)
+- `frontend/src/api/patientApi.js` — patient API module (list with `name`/`phone`/`active`/`page`/`size`/`sort`/`direction`, get, create, update, deactivate, activate) built on the shared Fetch layer.
+- `frontend/src/pages/PatientsPage.jsx` and `frontend/src/pages/patients.css` — list page: debounced name + phone search, active/inactive filter, pagination, sortable columns (patientNumber, fullName, phone), loading/error/empty/empty-filtered states, per-row view/edit/deactivate/reactivate actions, success/error feedback banner, and the deactivate-confirm dialog. The list renders **summary-only** fields (`patientNumber`, `fullName`, `phone`, `active`) — date of birth and address are shown only in the detail view.
+- `frontend/src/pages/PatientFormModal.jsx` — create/edit modal with client-side validation matching backend limits (fullName ≤150, dateOfBirth required + must be past, phone ≤30 + pattern, address ≤255), an info note that the patient number is assigned by the server (never entered client-side), server `fieldErrors` mapped per-field, and duplicate-submission prevention while saving.
+- `frontend/src/pages/PatientDetailModal.jsx` — read-only detail view backed by `GET /patients/{id}` (patient number, full name, date of birth, phone, address, status badge, created/updated timestamps, id) with its own loading/error/retry states.
+
+### Files modified (frontend)
+- `frontend/src/App.jsx` — replaced the `/patients` placeholder route with the real `PatientsPage`; the `/appointments` placeholder remains.
+- `frontend/src/pages/PatientFormModal.jsx` — hoisted the computed "today" max-date to a module-level constant to satisfy oxlint's `react/purity` rule.
+- `TODO.md`, `README.md`, `frontend/README.md`.
+
+### Behavior
+- Reuses the established Phase 7/8 UI patterns end-to-end: the `useFetch` hook, `Alert`, `ConfirmDialog`, `Modal`, `StateBlocks`, icons, and page CSS conventions — no new dependencies.
+- Patient numbers are never generated or stored client-side; the list/detail show the server-assigned `PAT-xxxxxx` number.
+- Filters/search reset to page 0; per-row busy state prevents double submission; create/edit/deactivate/reactivate refresh the list and live patient count and surface backend responses (400 `fieldErrors`, 404) from the standard API error shape.
+- No frontend API fallback/fake data: every smoke check below ran against the real backend.
+
+### Commands executed / results
+| Command | Result |
+|---------|--------|
+| `npm run lint` (oxlint) | **Clean** — 0 errors, 0 warnings on the final tree. |
+| `npm run build` (vite 8.3.4) | **BUILD SUCCESS** — `dist/index.html` 0.54 kB, CSS 17.91 kB (gzip 3.81), JS 326.96 kB (gzip 94.84). Built in ~470 ms. |
+| Live API smoke (backend jar, `local` profile, :8080; Vite preview :4173) | 25/25 checks PASS (see table below). Dev DB cleaned to 0/0/0/0 afterwards. |
+| `mvn -B -ntp test` | Not re-run — no backend source changed in this phase. Backend jar `medicore-backend-0.0.1-SNAPSHOT.jar` from Phase 7 used. |
+
+### Live smoke tests (dev DB was 0/0/0/0 before; fictional data, cleaned up by exact primary key afterward)
+| # | Scenario | Endpoint | Result |
+|---|----------|----------|--------|
+| 1 | Register patient A | `POST /patients` | **201** `id=4`, server-generated `PAT-000004`, `active=true` |
+| 2 | Register patient B (address omitted) | `POST /patients` | **201** `id=5`, `PAT-000005`, `address=""` |
+| 3 | List all patients | `GET /patients?size=20&sort=fullName&direction=asc` | **200** `totalElements=2` |
+| 4 | List rows are summary-only (no `dateOfBirth`/`address`) | keys of row | `id,patientNumber,fullName,phone,active` only |
+| 5 | Filter by name | `GET /patients?name=Sarah` | **200** → 1 row |
+| 6 | Filter by phone | `GET /patients?phone=+15550101002` | **200** → 1 row |
+| 7 | Filter active=false (none yet) | `GET /patients?active=false` | **200** `totalElements=0` |
+| 8 | Retrieve patient A detail | `GET /patients/4` | **200** full record incl. `dateOfBirth=1992-04-18` + address |
+| 9 | Update patient A | `PUT /patients/4` | **200** — name/phone/address updated, `patientNumber` unchanged |
+| 10 | Blank full name | `POST /patients` | **400** `fieldErrors[0]` = `fullName` |
+| 11 | Future date of birth | `POST /patients` | **400** `fieldErrors[0]` = `dateOfBirth` |
+| 12 | Invalid phone (`abc`) | `POST /patients` | **400** `fieldErrors[0]` = `phone` |
+| 13 | Missing date of birth | `POST /patients` | **400** `fieldErrors[0]` = `dateOfBirth` |
+| 14 | Missing patient | `GET /patients/999999` | **404** |
+| 15 | Sort asc by patientNumber | `GET /patients?sort=patientNumber&direction=asc` | **200** first row = id 4 |
+| 16 | Sort desc by patientNumber | `GET /patients?sort=patientNumber&direction=desc` | **200** first row = id 5 |
+| 17 | Deactivate patient A | `DELETE /patients/4` | **204** |
+| 18 | Confirm deactivated | `GET /patients/4` | **200** `active=false` |
+| 19 | Reactivate patient A | `POST /patients/4/activate` | **200** `active=true` |
+| 20 | CORS allowed origin | `GET /patients` + `Origin: http://localhost:5173` | **200** + `Access-Control-Allow-Origin` |
+| 21 | CORS preflight | `OPTIONS /patients` | **200** + ACAO |
+| 22 | CORS disallowed origin | `GET /patients` + `Origin: http://evil.example` | no ACAO header |
+| 23 | Frontend route/bundle | `GET http://localhost:4173/patients` (Vite preview) | **200** (SPA fallback); built JS contains 26 `patients` references + `http://localhost:8080/api/v1` base URL; only one "Coming in Phase" string remains (the Appointments placeholder) |
+
+### Cleanup
+- Deleted **by exact primary key** via MySQL against the dev `medicore` schema: patients `4, 5` (created by these smoke tests). Verified `patients=0 departments=1 doctors=1 appointments=0` afterwards. The `Dentist` department (id=11) and `Dr. Smith` doctor (id=7) are pre-existing rows and were **not** touched; the database was not reset.
+- Stopped both backend Java processes (PID 11032 app + PID 7496 `javapath` launcher) and the Vite preview server (PID 3684 + npm wrapper 14944) after tests/cleanup; ports 8080/4173 verified free.
+- Note: the backend `Start-Process` returns the `oraclejavapath` launcher PID, not the real JVM PID; the actual app JVM (`jdk-21.0.12\bin\java.exe`) holds port 8080. This looked like a startup hang but startup completed in ~10 s — see the diagnostic note in the Phase 9 session.
+
+### Phase 9 status: Patient Management UI COMPLETE
+- §9 "Patient list, registration, editing, and search screens" marked done.
+- `/patients` is documented as implemented in both `README.md` and `frontend/README.md`.
+- Optional checklist item "Form validation and user-friendly API error messages" is now satisfied for Patients too; it stays `[~]` only because Appointments is still pending.
+
+### Unresolved issues
+- No browser automation used; verification = oxlint + production build + live API smoke tests against the real backend (as in Phases 6-8).
+- Dev database now contains two pre-existing demo rows left by a reviewer (`Dentist` department id=11, `Dr. Smith` doctor id=7); `patients=0`, `appointments=0`. Sample-data item (TODO §10) still open.
+- `PlaceholderPage.jsx` still contains a leftover `Coming in Phase 7` tag (used only by the pending `/appointments` page); it can be updated when the Appointments screen ships in Phase 10.

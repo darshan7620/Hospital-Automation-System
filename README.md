@@ -126,8 +126,8 @@ the URL, copy `frontend/.env.example` to `frontend/.env.local` and edit it.
 | `npm run preview` | Serve the production build (port 4173)         |
 | `npm run lint`    | Lint the source (Oxlint)                         |
 
-Frontend routes: `/dashboard`, `/departments` and `/doctors` (implemented), plus
-`/patients`, `/appointments` placeholders, and a 404 page.
+Frontend routes: `/dashboard`, `/departments`, `/doctors` and `/patients`
+(implemented), plus an `/appointments` placeholder and a 404 page.
 See `frontend/README.md` for the source layout.
 
 ## Backend tests

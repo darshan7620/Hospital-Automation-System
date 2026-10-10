@@ -3,6 +3,7 @@ import { AppLayout } from './components/layout/AppLayout'
 import { DashboardPage } from './pages/DashboardPage'
 import { DepartmentsPage } from './pages/DepartmentsPage'
 import { DoctorsPage } from './pages/DoctorsPage'
+import { PatientsPage } from './pages/PatientsPage'
 import { NotFoundPage, PlaceholderPage } from './pages/PlaceholderPage'
 
 export default function App() {
@@ -13,20 +14,7 @@ export default function App() {
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/departments" element={<DepartmentsPage />} />
         <Route path="/doctors" element={<DoctorsPage />} />
-        <Route
-          path="/patients"
-          element={
-            <PlaceholderPage
-              title="Patients"
-              description="Register patients, maintain their records, and search the registry."
-              capabilities={[
-                'Patient search by name and phone',
-                'Registration form with server-side patient number generation',
-                'Detail view with full record (list view stays summary-only)',
-              ]}
-            />
-          }
-        />
+        <Route path="/patients" element={<PatientsPage />} />
         <Route
           path="/appointments"
           element={
